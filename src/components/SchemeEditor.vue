@@ -20,9 +20,9 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'update:visible']);
 
 const highlighter = (code) => {
-  if (code && code.target && code.target.value !== undefined) {
+  if (code ) {
     try{
-      const highlighted = Prism.highlight(code.target.value, Prism.languages.scheme,  "scheme") 
+      const highlighted = Prism.highlight(code, Prism.languages.scheme,  "scheme") 
       console.log("highlighted", highlighted)
       return highlighted
     }
@@ -39,7 +39,7 @@ const toggleEditor = () => {
 };
 
 const updateCode = (newCode) => {
-  console.log("updateCode", newCode)
+
   const code = newCode.target.value
   emit('update:modelValue', code);
 };
