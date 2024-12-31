@@ -1,94 +1,71 @@
 <script setup>
+import { ref, onMounted, watch } from 'vue';
 import ForceGraph from './components/ForceGraph.vue';
+import SchemeEditor from './components/SchemeEditor.vue';
 
-// Sample data for the graph
-const nodes = [
-  { id: 1, name: 'Node A', color: '#4CAF50' },
-  { id: 2, name: 'Node B', color: '#2196F3' },
-  { id: 3, name: 'Node C', color: '#FFC107' },
-  { id: 4, name: 'Node D', color: '#9C27B0' },
-  { id: 5, name: 'Node E', color: '#F44336' }
-];
+const nodes = ref([
+  { id: 1, name: "Node 1" },
+  { id: 2, name: "Node 2" },
+  { id: 3, name: "Node 3" }
+]);
 
-const links = [
-  { source: 1, target: 2 },           // Mono-directional A -> B
-  { source: 2, target: 1 },           // Bi-directional B -> A (with above)
-  { source: 2, target: 3 },           // Mono-directional B -> C
-  { source: 3, target: 4 },           // Start of multi-directional
-  { source: 4, target: 5 },           // Multi-directional
-  { source: 5, target: 3 },           // Multi-directional (closes the loop)
-  { source: 1, target: 5 }            // Additional connection
-];
+const links = ref([
+  { source: 1, target: 2 },
+  { source: 2, target: 3 },
+  { source: 3, target: 1 }
+]);
+
+const showEditor = ref(true);
+const schemeCode = ref('');
+
+
+
+// Add a watch if you need to respond to code changes
+watch(schemeCode, (newCode) => {
+  
+  // Add your code processing logic here
+});
 </script>
 
 <template>
-  <div class="container">
-    <h1>Force-Directed Graph</h1>
-    <div class="legend">
-      <div class="legend-item">
-        <span class="line mono"></span>
-        <span>Mono-directional</span>
-      </div>
-      <div class="legend-item">
-        <span class="line bi"></span>
-        <span>Bi-directional</span>
-      </div>
-      <div class="legend-item">
-        <span class="line multi"></span>
-        <span>Multi-directional</span>
-      </div>
+  <div class="app-container" style="background-color: #f0f0f0;">
+    <div class="editor-overlay">
+      <SchemeEditor
+        v-model="schemeCode"
+        v-model:visible="showEditor"
+      />
     </div>
-    <ForceGraph :nodes="nodes" :links="links" />
+    <div class="graph-container">
+      <ForceGraph :nodes="nodes" :links="links" />
+    </div>
   </div>
 </template>
 
 <style>
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-h1 {
-  text-align: center;
-  color: #333;
-  margin-bottom: 20px;
-}
-
-.legend {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin-bottom: 20px;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.line {
-  display: inline-block;
-  width: 30px;
-  height: 2px;
-  background: #000000;
-}
-
-.line.bi {
-  background: linear-gradient(to right, #666 50%, transparent 50%);
-  background-size: 10px 100%;
-  background-repeat: repeat-x;
-}
-
-.line.multi {
-  height: 3px;
-}
-
-body {
+/* Reset CSS */
+* {
   margin: 0;
   padding: 0;
-  font-family: Arial, sans-serif;
-  background-color: #f5f5f5;
+  box-sizing: border-box;
 }
+
+.app-container {
+  /* width: 100%;
+  height: 100vh; */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  position: fixed;
+  overflow: hidden;
+}
+
+.editor-overlay {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 2;
+  width: 40%;
+}
+
 </style>
