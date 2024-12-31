@@ -20,6 +20,19 @@ let g = null;
 const width = 800;
 const height = 600;
 
+const getLinkType = (link) => {
+    const reverseLink = props.links.find(l => 
+      l.source === link.target && l.target === link.source
+    );
+    const multiLink = props.links.filter(l => 
+      l.source === link.source || l.target === link.source
+    ).length > 2;
+
+    if (multiLink) return 'multi';
+    if (reverseLink) return 'bi';
+    return 'mono';
+  };
+
 // Move the simulation creation and update logic to a separate function
 const updateSimulation = () => {
   if (!svg) return;
@@ -30,12 +43,11 @@ const updateSimulation = () => {
   }
   
   // Clear previous nodes and links
-  g.selectAll('.nodes').remove();
-  g.selectAll('.links').remove();
+  g.selectAll('*').remove();
 
   // Create the force simulation with optimized settings
   simulation = d3.forceSimulation(props.nodes)
-    .force('link', d3.forceLink(props.links)
+  .force('link', d3.forceLink(props.links)
       .id(d => d.id)
       .distance(150)
       .strength(1))
@@ -43,12 +55,12 @@ const updateSimulation = () => {
       .strength(-1000)
       .distanceMin(100)
       .distanceMax(500))
-    .force('center', d3.forceCenter(width / 2, height / 2))
+    .force('center', d3.forceCenter())
     .force('collision', d3.forceCollide().radius(50))
     .force('x', d3.forceX(width / 2).strength(0.1))
     .force('y', d3.forceY(height / 2).strength(0.1));
 
-  // Draw the links first (so they appear under nodes)
+  // Draw the links with proper data binding
   const links = g.append('g')
     .attr('class', 'links')
     .selectAll('line')
@@ -56,6 +68,7 @@ const updateSimulation = () => {
     .join('line')
     .attr('class', d => `link link-${getLinkType(d)}`)
     .attr('stroke', '#999')
+    .attr('stroke-width', 2)
     .attr('marker-end', d => `url(#arrow-${getLinkType(d)})`);
 
   // Draw the nodes
@@ -101,30 +114,26 @@ const updateSimulation = () => {
 
   // Update positions on each tick
   simulation.on('tick', () => {
+    // Calculate node dimensions for better link positioning
+    const nodeWidth = 100; // Approximate default width
+    const nodeHeight = 40;  // Approximate default height
+
     links
       .attr('x1', d => {
-        const dx = d.target.x - d.source.x;
-        const dy = d.target.y - d.source.y;
-        const angle = Math.atan2(dy, dx);
-        return d.source.x + 20 * Math.cos(angle); // Start from node edge
+        const sourceNode = d.source;
+        return sourceNode.x;
       })
       .attr('y1', d => {
-        const dx = d.target.x - d.source.x;
-        const dy = d.target.y - d.source.y;
-        const angle = Math.atan2(dy, dx);
-        return d.source.y + 20 * Math.sin(angle); // Start from node edge
+        const sourceNode = d.source;
+        return sourceNode.y;
       })
       .attr('x2', d => {
-        const dx = d.target.x - d.source.x;
-        const dy = d.target.y - d.source.y;
-        const angle = Math.atan2(dy, dx);
-        return d.target.x - 25 * Math.cos(angle); // Stop before arrow (adjusted distance)
+        const targetNode = d.target;
+        return targetNode.x;
       })
       .attr('y2', d => {
-        const dx = d.target.x - d.source.x;
-        const dy = d.target.y - d.source.y;
-        const angle = Math.atan2(dy, dx);
-        return d.target.y - 25 * Math.sin(angle); // Stop before arrow (adjusted distance)
+        const targetNode = d.target;
+        return targetNode.y;
       });
 
     nodes.attr('transform', d => `translate(${d.x},${d.y})`);

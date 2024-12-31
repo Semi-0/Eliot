@@ -2,21 +2,22 @@
 import { ref, onMounted, watch, shallowRef } from 'vue';
 import ForceGraph from './components/ForceGraph.vue';
 import SchemeEditor from './components/SchemeEditor.vue';
-import { main, env } from "seminteresting/Main"
+import { main, env, clear_env } from "seminteresting/Main"
 import { define_generic_matcher } from 'seminteresting/tools/ExpressionHandler';
 import { evaluate } from 'seminteresting/Evaluator';
 import { nextTick } from 'vue';
-import { create_default_scoped_primtive_func } from 'seminteresting/definition/PackageSystem';
+import { create_default_scoped_primtive_func, make_primitive_package } from 'seminteresting/definition/PackageSystem';
 import { getCurrentInstance } from 'vue';
 import { ssrDynamicImportKey } from 'vite/module-runner';
 import { watchEffect } from 'vue';
+import { DefaultEnvironment } from 'seminteresting/definition/Environment';
 const nodes = shallowRef([
   // { id: 1, name: "Node 1" },
   // { id: 2, name: "Node 2" },
   // { id: 3, name: "Node 3" }
 ]);
 
-const links = ref([
+const links = shallowRef([
   // { source: 1, target: 2 },
   // { source: 2, target: 3 },
   // { source: 3, target: 1 }
@@ -38,20 +39,21 @@ const get_new_id = reference_store()
 
 function add_node(id, name) {
   nodes.value = [...nodes.value, { id: id, name: name }];
-  nextTick(() => {
-    console.log("Node added, DOM updated");
-  });
+  console.log("add_node", nodes.value)
+  // nextTick(() => {
+  //   console.log("Node added, DOM updated");
+  // });
   return id;
 }
 
-function add_link(source, target) {
-  links.value = [...links.value, { source: source, target: target }];
-  nextTick(() => {
-    console.log("Link added, DOM updated");
-  });
-}
+// function add_link(source, target) {
+//   console.log("add_link", source, target)
+//   links.value = [...links.value, { source: source, target: target }];
+// }
 
-add_node(3, "c")
+// add_node(4, "c")
+// add_node(5, "d")
+// connect(4, 5)
 
 watchEffect(() => {
   console.log("watch effect", nodes.value)
@@ -64,7 +66,7 @@ function connect(source_id, target_id) {
 function make_graph_wrapper_package() {
   const procedures = {
     "node":  (name) => {
-      console.log("node", name)
+      console.log("try add", name)
       const id = add_node(get_new_id(), name)
       return id
     },
@@ -89,23 +91,37 @@ function make_graph_wrapper_package() {
   }
 }
 
+function clear_graph(){
+  nodes.value = []
+  links.value = []
+}
+
 // export function useForceUpdate() {
 //   const instance = getCurrentInstance()
 //   return () => instance.proxy.$forceUpdate()
 // }
 
-env.load(make_graph_wrapper_package())
+// env.load(make_graph_wrapper_package())
 
 
 // Add a watch if you need to respond to code changes
 watch(schemeCode, (newCode) => {
-  console.log("watch schemeCode", newCode)
    const full_text = newCode
   //  console.log(full_text)
 
+  
+
   try{
-    const result = main(full_text)
-    execution_result.value = result.value
+    clear_graph()
+    setTimeout(() => {
+      clear_env()
+      env.load(make_primitive_package())
+      env.load(make_graph_wrapper_package())
+      const result = main(full_text)
+      
+      execution_result.value = result.value
+    }, 10)
+    
   }
   catch(e){
     console.error(e)
