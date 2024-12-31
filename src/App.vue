@@ -1,43 +1,143 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, shallowRef } from 'vue';
 import ForceGraph from './components/ForceGraph.vue';
 import SchemeEditor from './components/SchemeEditor.vue';
-
-const nodes = ref([
-  { id: 1, name: "Node 1" },
-  { id: 2, name: "Node 2" },
-  { id: 3, name: "Node 3" }
+import { main, env } from "seminteresting/Main"
+import { define_generic_matcher } from 'seminteresting/tools/ExpressionHandler';
+import { evaluate } from 'seminteresting/Evaluator';
+import { nextTick } from 'vue';
+import { create_default_scoped_primtive_func } from 'seminteresting/definition/PackageSystem';
+import { getCurrentInstance } from 'vue';
+import { ssrDynamicImportKey } from 'vite/module-runner';
+import { watchEffect } from 'vue';
+const nodes = shallowRef([
+  // { id: 1, name: "Node 1" },
+  // { id: 2, name: "Node 2" },
+  // { id: 3, name: "Node 3" }
 ]);
 
 const links = ref([
-  { source: 1, target: 2 },
-  { source: 2, target: 3 },
-  { source: 3, target: 1 }
+  // { source: 1, target: 2 },
+  // { source: 2, target: 3 },
+  // { source: 3, target: 1 }
 ]);
 
 const showEditor = ref(true);
 const schemeCode = ref('');
+const execution_result = ref('');
 
+function reference_store() {
+  let id = 0
+  return () => {
+    id++
+    return id
+  }
+}
+
+const get_new_id = reference_store()
+
+function add_node(id, name) {
+  nodes.value = [...nodes.value, { id: id, name: name }];
+  nextTick(() => {
+    console.log("Node added, DOM updated");
+  });
+  return id;
+}
+
+function add_link(source, target) {
+  links.value = [...links.value, { source: source, target: target }];
+  nextTick(() => {
+    console.log("Link added, DOM updated");
+  });
+}
+
+add_node(3, "c")
+
+watchEffect(() => {
+  console.log("watch effect", nodes.value)
+})
+
+function connect(source_id, target_id) {
+  add_link(source_id, target_id);
+}
+
+function make_graph_wrapper_package() {
+  const procedures = {
+    "node":  (name) => {
+      console.log("node", name)
+      const id = add_node(get_new_id(), name)
+      return id
+    },
+    "->":  (source_id, target_id) => {
+       connect(source_id, target_id)
+    }
+  }
+
+  const dict = Object.fromEntries(Object
+                            .entries(procedures)
+                            .map(([key, value]) => 
+                                [key, create_default_scoped_primtive_func(value)]))
+
+  return {
+    name: "graph_wrapper",
+    dict: dict,
+    ref: 0,
+    has: (key) => dict[key] !== undefined,
+    not_has: (key) => dict[key] === undefined,
+    summarize: () => summarize_dict(dict, summarize_scoped_value),
+    copy: () => make_graph_wrapper_package(),
+  }
+}
+
+// export function useForceUpdate() {
+//   const instance = getCurrentInstance()
+//   return () => instance.proxy.$forceUpdate()
+// }
+
+env.load(make_graph_wrapper_package())
 
 
 // Add a watch if you need to respond to code changes
 watch(schemeCode, (newCode) => {
+  console.log("watch schemeCode", newCode)
+   const full_text = newCode
+  //  console.log(full_text)
+
+  try{
+    const result = main(full_text)
+    execution_result.value = result.value
+  }
+  catch(e){
+    console.error(e)
+  }
   
+   console.log(execution_result.value)
   // Add your code processing logic here
 });
+
+function appendRandomNode() {
+  const randomName = `Node ${Math.floor(Math.random() * 1000)}`;
+  add_node(get_new_id(), randomName);
+}
 </script>
 
 <template>
   <div class="app-container" style="background-color: #f0f0f0;">
+
     <div class="editor-overlay">
       <SchemeEditor
         v-model="schemeCode"
         v-model:visible="showEditor"
       />
+      <div class="execution-result">
+        abc
+      </div>
+      <button class="append-button" @click="appendRandomNode">Add Random Node</button>
     </div>
     <div class="graph-container">
       <ForceGraph :nodes="nodes" :links="links" />
     </div>
+
   </div>
 </template>
 
@@ -68,4 +168,23 @@ watch(schemeCode, (newCode) => {
   width: 40%;
 }
 
+
+.graph-container {
+  position: relative;
+  z-index: 1;
+}
+
+.append-button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.append-button:hover {
+  background-color: #45a049;
+}
 </style>

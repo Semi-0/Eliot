@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { PrismEditor } from  "vue-prism-editor"
-
+import { highlight, languages } from 'prismjs';
 import 'prismjs';
 import 'prismjs/themes/prism.css';
 import 'prismjs/components/prism-scheme';
@@ -20,7 +20,17 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'update:visible']);
 
 const highlighter = (code) => {
-  return Prism.highlight(code, Prism.languages, 'scheme');
+  if (code && code.target && code.target.value !== undefined) {
+    try{
+      const highlighted = Prism.highlight(code.target.value, Prism.languages.scheme,  "scheme") 
+      console.log("highlighted", highlighted)
+      return highlighted
+    }
+    catch(e){
+      console.error(e)
+    }
+  }
+  return ""
 };
 
 const toggleEditor = () => {
@@ -29,8 +39,9 @@ const toggleEditor = () => {
 };
 
 const updateCode = (newCode) => {
-  console.log('Code updated:', newCode);
-  emit('update:modelValue', newCode);
+  console.log("updateCode", newCode)
+  const code = newCode.target.value
+  emit('update:modelValue', code);
 };
 </script>
 

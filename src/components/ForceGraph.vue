@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import * as d3 from 'd3';
 
 const props = defineProps({
@@ -15,88 +15,23 @@ const props = defineProps({
 
 const svgRef = ref(null);
 let simulation = null;
+let svg = null;
+let g = null;
+const width = 800;
+const height = 600;
 
-onMounted(() => {
-  const width = 800;
-  const height = 600;
+// Move the simulation creation and update logic to a separate function
+const updateSimulation = () => {
+  if (!svg) return;
   
-  const svg = d3.select(svgRef.value)
-    .attr('width', width)
-    .attr('height', height)
-    .attr('viewBox', [0, 0, width, height]);
-
-  // Create different arrow markers for different connection types
-  const defs = svg.append('defs');
+  // Clear previous simulation
+  if (simulation) {
+    simulation.stop();
+  }
   
-  // Single arrow marker (for mono-directional)
-  defs.append('marker')
-    .attr('id', 'arrow-mono')
-    .attr('viewBox', '-5 -5 10 10')
-    .attr('refX', 15)
-    .attr('refY', 0)
-    .attr('markerWidth', 6)
-    .attr('markerHeight', 6)
-    .attr('orient', 'auto')
-    .append('path')
-    .attr('d', 'M -4 -4 L 0 0 L -4 4')
-    .attr('fill', 'none')
-    .attr('stroke', '#999')
-    .attr('stroke-width', '1px');
-
-  // Double arrow marker (for bi-directional)
-  defs.append('marker')
-    .attr('id', 'arrow-bi')
-    .attr('viewBox', '-5 -5 10 10')
-    .attr('refX', 15)
-    .attr('refY', 0)
-    .attr('markerWidth', 6)
-    .attr('markerHeight', 6)
-    .attr('orient', 'auto')
-    .append('path')
-    .attr('d', 'M -4 -4 L 0 0 L -4 4 M -2 -4 L 2 0 L -2 4')
-    .attr('fill', 'none')
-    .attr('stroke', '#999')
-    .attr('stroke-width', '1px');
-
-  // Multi-directional marker (for complex connections)
-  defs.append('marker')
-    .attr('id', 'arrow-multi')
-    .attr('viewBox', '-5 -5 10 10')
-    .attr('refX', 15)
-    .attr('refY', 0)
-    .attr('markerWidth', 6)
-    .attr('markerHeight', 6)
-    .attr('orient', 'auto')
-    .append('path')
-    .attr('d', 'M -4 -4 L 0 0 L -4 4 L -2 0 Z')
-    .attr('fill', '#999')
-    .attr('stroke', '#999')
-    .attr('stroke-width', '1px');
-
-  const g = svg.append('g');
-
-  // Zoom behavior
-  const zoom = d3.zoom()
-    .scaleExtent([0.1, 4])
-    .on('zoom', (event) => {
-      g.attr('transform', event.transform);
-    });
-
-  svg.call(zoom);
-
-  // Helper function to determine link type
-  const getLinkType = (link) => {
-    const reverseLink = props.links.find(l => 
-      l.source === link.target && l.target === link.source
-    );
-    const multiLink = props.links.filter(l => 
-      l.source === link.source || l.target === link.source
-    ).length > 2;
-
-    if (multiLink) return 'multi';
-    if (reverseLink) return 'bi';
-    return 'mono';
-  };
+  // Clear previous nodes and links
+  g.selectAll('.nodes').remove();
+  g.selectAll('.links').remove();
 
   // Create the force simulation with optimized settings
   simulation = d3.forceSimulation(props.nodes)
@@ -211,7 +146,85 @@ onMounted(() => {
     event.subject.fx = null;
     event.subject.fy = null;
   }
+};
+
+onMounted(() => {
+  svg = d3.select(svgRef.value)
+    .attr('width', width)
+    .attr('height', height)
+    .attr('viewBox', [0, 0, width, height]);
+
+  // Create different arrow markers for different connection types
+  const defs = svg.append('defs');
+  
+  // Single arrow marker (for mono-directional)
+  defs.append('marker')
+    .attr('id', 'arrow-mono')
+    .attr('viewBox', '-5 -5 10 10')
+    .attr('refX', 15)
+    .attr('refY', 0)
+    .attr('markerWidth', 6)
+    .attr('markerHeight', 6)
+    .attr('orient', 'auto')
+    .append('path')
+    .attr('d', 'M -4 -4 L 0 0 L -4 4')
+    .attr('fill', 'none')
+    .attr('stroke', '#999')
+    .attr('stroke-width', '1px');
+
+  // Double arrow marker (for bi-directional)
+  defs.append('marker')
+    .attr('id', 'arrow-bi')
+    .attr('viewBox', '-5 -5 10 10')
+    .attr('refX', 15)
+    .attr('refY', 0)
+    .attr('markerWidth', 6)
+    .attr('markerHeight', 6)
+    .attr('orient', 'auto')
+    .append('path')
+    .attr('d', 'M -4 -4 L 0 0 L -4 4 M -2 -4 L 2 0 L -2 4')
+    .attr('fill', 'none')
+    .attr('stroke', '#999')
+    .attr('stroke-width', '1px');
+
+  // Multi-directional marker (for complex connections)
+  defs.append('marker')
+    .attr('id', 'arrow-multi')
+    .attr('viewBox', '-5 -5 10 10')
+    .attr('refX', 15)
+    .attr('refY', 0)
+    .attr('markerWidth', 6)
+    .attr('markerHeight', 6)
+    .attr('orient', 'auto')
+    .append('path')
+    .attr('d', 'M -4 -4 L 0 0 L -4 4 L -2 0 Z')
+    .attr('fill', '#999')
+    .attr('stroke', '#999')
+    .attr('stroke-width', '1px');
+
+  g = svg.append('g');
+
+  // Zoom behavior
+  const zoom = d3.zoom()
+    .scaleExtent([0.1, 4])
+    .on('zoom', (event) => {
+      g.attr('transform', event.transform);
+    });
+
+  svg.call(zoom);
+
+  // Initial simulation setup
+  updateSimulation();
 });
+
+// Add watch effect for nodes and links
+watch(
+  () => [props.nodes, props.links],
+  () => {
+    updateSimulation();
+  },
+  { deep: true }
+);
 
 onUnmounted(() => {
   if (simulation) {
