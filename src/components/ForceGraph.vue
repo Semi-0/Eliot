@@ -158,10 +158,16 @@ const updateSimulation = () => {
 };
 
 onMounted(() => {
+  const padding = 50;
+  const viewBoxWidth = width + (padding * 2);
+  const viewBoxHeight = height + (padding * 2);
+
   svg = d3.select(svgRef.value)
-    .attr('width', width)
-    .attr('height', height)
-    .attr('viewBox', [0, 0, width, height]);
+    .attr('width', '100%')  // Make SVG responsive
+    .attr('height', '100%')
+    // .attr('viewBox', [-padding, -padding, viewBoxWidth, viewBoxHeight])
+    .attr('preserveAspectRatio', 'xMidYMid meet');
+
 
   // Create different arrow markers for different connection types
   const defs = svg.append('defs');

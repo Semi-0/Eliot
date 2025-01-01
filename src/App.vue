@@ -46,10 +46,10 @@ function add_node(id, name) {
   return id;
 }
 
-// function add_link(source, target) {
-//   console.log("add_link", source, target)
-//   links.value = [...links.value, { source: source, target: target }];
-// }
+function add_link(source, target) {
+  console.log("add_link", source, target)
+  links.value = [...links.value, { source: source, target: target }];
+}
 
 // add_node(4, "c")
 // add_node(5, "d")
@@ -166,28 +166,30 @@ function appendRandomNode() {
 }
 
 .app-container {
-  /* width: 100%;
-  height: 100vh; */
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  position: fixed;
-  overflow: hidden;
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  overflow: visible;
 }
 
 .editor-overlay {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  z-index: 2;
+  position: relative;
   width: 40%;
+  z-index: 2;
 }
 
 
 .graph-container {
   position: relative;
+  flex: 1;
+  min-height: 100%;
   z-index: 1;
+  overflow: visible
 }
 
 .append-button {
