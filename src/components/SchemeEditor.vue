@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted } from 'vue';
-import { PrismEditor } from  "vue-prism-editor"
+import { PrismEditor } from "vue-prism-editor";
 import { highlight, languages } from 'prismjs';
 import 'prismjs';
 import 'prismjs/themes/prism.css';
@@ -20,27 +20,13 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'update:visible']);
 
 const highlighter = (code) => {
-  if (code ) {
-    try{
-      const highlighted = Prism.highlight(code, Prism.languages.scheme,  "scheme") 
-      console.log("highlighted", highlighted)
-      return highlighted
-    }
-    catch(e){
-      console.error(e)
-    }
+  if (code) {
+    return highlight(code, languages.scheme, 'scheme');
   }
-  return ""
+  return '';
 };
 
-const toggleEditor = () => {
-  console.log('Toggle clicked, current visible:', props.visible);
-  emit('update:visible', !props.visible);
-};
-
-const updateCode = (newCode) => {
-
-  const code = newCode.target.value
+const updateCode = (code) => {
   emit('update:modelValue', code);
 };
 </script>
@@ -50,11 +36,10 @@ const updateCode = (newCode) => {
     <div v-if="visible" class="editor-container">
       <PrismEditor
         :modelValue="modelValue"
-        @input="updateCode"
+        @update:modelValue="updateCode"
         :highlight="highlighter"
-        line-numbers
-        style="height: 800px; width: 100%; background: transparent; color: black;"
-        placeholder="Enter Scheme code here..."
+        :line-numbers="true"
+        class="prism-editor"
       />
     </div>
   </div>
@@ -62,27 +47,44 @@ const updateCode = (newCode) => {
 
 <style>
 .scheme-editor-container {
-  border-radius: 8px;
-  padding: 10px;
+  width: 100%;
+  height: 100%;
 }
 
-/* Ensure text is visible against any background */
+.editor-container {
+  height: 100%;
+}
+
+.prism-editor {
+  /* Basic editor styling */
+  background: #f5f5f5 !important;
+  font-family: 'Fira code', 'Fira Mono', Consolas, Menlo, Courier, monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 5px;
+  height: 100%;
+}
+
 .prism-editor__textarea {
-  color: black !important;
-  background: transparent !important;
-  text-shadow: 
-    -1px -1px 0 white,
-    1px -1px 0 white,
-    -1px 1px 0 white,
-    1px 1px 0 white;  /* This creates a white outline around text */
-}
-
-.prism-editor__container {
+  /* Ensure proper text visibility */
+  color: #000 !important;
   background: transparent !important;
 }
 
-/* Make line numbers more visible */
+.prism-editor__editor {
+  /* Ensure proper content layout */
+  white-space: pre;
+  overflow: auto;
+  padding: 0.5em;
+}
+
 .prism-editor__line-numbers {
-  background: rgba(255, 255, 255, 0.5) !important;
+  /* Fix line numbers positioning */
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 0.5em;
+  background: #f0f0f0;
+  border-right: 1px solid #ddd;
 }
 </style> 

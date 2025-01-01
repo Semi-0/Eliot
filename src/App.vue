@@ -129,10 +129,10 @@ watch(schemeCode, (newCode) => {
   // Add your code processing logic here
 });
 
-function appendRandomNode() {
-  const randomName = `Node ${Math.floor(Math.random() * 1000)}`;
-  add_node(get_new_id(), randomName);
-}
+// function appendRandomNode() {
+//   const randomName = `Node ${Math.floor(Math.random() * 1000)}`;
+//   add_node(get_new_id(), randomName);
+// }
 </script>
 
 <template>
@@ -143,10 +143,8 @@ function appendRandomNode() {
         v-model="schemeCode"
         v-model:visible="showEditor"
       />
-      <div class="execution-result">
-        abc
-      </div>
-      <button class="append-button" @click="appendRandomNode">Add Random Node</button>
+
+
     </div>
     <div class="graph-container">
       <ForceGraph :nodes="nodes" :links="links" />
