@@ -51,9 +51,6 @@ function add_link(source, target) {
   links.value = [...links.value, { source: source, target: target }];
 }
 
-// add_node(4, "c")
-// add_node(5, "d")
-// connect(4, 5)
 
 watchEffect(() => {
   console.log("watch effect", nodes.value)
@@ -65,12 +62,13 @@ function connect(source_id, target_id) {
 
 function make_graph_wrapper_package() {
   const procedures = {
-    "node":  (name) => {
+    "<>":  (name) => {
       console.log("try add", name)
       const id = add_node(get_new_id(), name)
       return id
     },
     "->":  (source_id, target_id) => {
+      console.log("try connect", source_id, target_id)
        connect(source_id, target_id)
     }
   }
