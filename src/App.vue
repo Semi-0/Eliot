@@ -3,6 +3,7 @@ import { ref, onMounted, watch, shallowRef } from 'vue';
 import ForceGraph from './components/ForceGraph.vue';
 import SchemeEditor from './components/SchemeEditor.vue';
 import { main, env, clear_env } from "seminteresting/Main"
+import CodeMirrorEditor from './components/CodeMirrorEditor.vue';
 import { define_generic_matcher } from 'seminteresting/tools/ExpressionHandler';
 import { evaluate } from 'seminteresting/Evaluator';
 import { nextTick } from 'vue';
@@ -108,7 +109,7 @@ watch(schemeCode, (newCode) => {
       env.load(make_primitive_package())
       env.load(make_graph_wrapper_package())
       const result = main(full_text)
-      
+      console.log("result", result)
       execution_result.value = result.value
     }, 10)
     
@@ -128,7 +129,11 @@ watch(schemeCode, (newCode) => {
   <div class="app-container" style="background-color: #f0f0f0;">
 
     <div class="editor-overlay">
-      <SchemeEditor
+      <!-- <SchemeEditor
+        v-model="schemeCode"
+        v-model:visible="showEditor"
+      /> -->
+      <CodeMirrorEditor
         v-model="schemeCode"
         v-model:visible="showEditor"
       />
