@@ -221,8 +221,9 @@ onMounted(() => {
     });
 
   svg.call(zoom);
+  svg.call(zoom.transform, d3.zoomIdentity.translate(width / 2 - 200, height / 2 - 20));
 
-  // Initial simulation setup
+  // Initial simulation setu *//* 
   updateSimulation();
 });
 

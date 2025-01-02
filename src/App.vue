@@ -94,20 +94,12 @@ function clear_graph(){
   links.value = []
 }
 
-// export function useForceUpdate() {
-//   const instance = getCurrentInstance()
-//   return () => instance.proxy.$forceUpdate()
-// }
 
-// env.load(make_graph_wrapper_package())
 
 
 // Add a watch if you need to respond to code changes
 watch(schemeCode, (newCode) => {
    const full_text = newCode
-  //  console.log(full_text)
-
-  
 
   try{
     clear_graph()
@@ -129,10 +121,7 @@ watch(schemeCode, (newCode) => {
   // Add your code processing logic here
 });
 
-// function appendRandomNode() {
-//   const randomName = `Node ${Math.floor(Math.random() * 1000)}`;
-//   add_node(get_new_id(), randomName);
-// }
+
 </script>
 
 <template>
@@ -171,6 +160,7 @@ watch(schemeCode, (newCode) => {
   gap: 20px;
   padding: 20px;
   overflow: visible;
+
 }
 
 .editor-overlay {
@@ -185,7 +175,8 @@ watch(schemeCode, (newCode) => {
   flex: 1;
   min-height: 100%;
   z-index: 1;
-  overflow: visible
+  overflow: visible;
+
 }
 
 .append-button {

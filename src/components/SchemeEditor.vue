@@ -34,49 +34,50 @@ const updateCode = (code) => {
 <template>
   <div class="scheme-editor-container">
     <div v-if="visible" class="editor-container">
+      
       <PrismEditor
+        class="prism-editor"
         :modelValue="modelValue"
         @update:modelValue="updateCode"
         :highlight="highlighter"
         :line-numbers="true"
-        class="prism-editor"
+  
       />
     </div>
   </div>
 </template>
 
 <style>
-.scheme-editor-container {
+/* .scheme-editor-container {
   width: 100%;
   height: 100%;
-}
-
+} */
+/* 
 .editor-container {
   height: 100%;
-}
+} */
 
-.prism-editor {
-  /* Basic editor styling */
+/* .prism-editor {
   background: #f5f5f5 !important;
   font-family: 'Fira code', 'Fira Mono', Consolas, Menlo, Courier, monospace;
   font-size: 14px;
   line-height: 1.5;
   padding: 5px;
-  height: 100%;
-}
 
-.prism-editor__textarea {
-  /* Ensure proper text visibility */
+} */
+
+/* .prism-editor__textarea {
+
   color: #000 !important;
   background: transparent !important;
 }
 
 .prism-editor__editor {
-  /* Ensure proper content layout */
+ 
   white-space: pre;
   overflow: auto;
   padding: 0.5em;
-}
+} */
 
 .prism-editor__line-numbers {
   /* Fix line numbers positioning */
