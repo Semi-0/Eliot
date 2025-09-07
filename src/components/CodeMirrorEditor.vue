@@ -91,8 +91,8 @@ watch(() => props.modelValue, (newValue) => {
         :style="{
           width: preview ? '50%' : '100%',
           height: config.height,
-          backgroundColor: '#fff',
-          color: '#333'
+          backgroundColor: 'transparent',
+          color: '#e6e6e6'
         }"
         placeholder=""
         :extensions="extensions"
@@ -163,4 +163,31 @@ watch(() => props.modelValue, (newValue) => {
   display: inline-block;
   font-feature-settings: 'tnum';
 }
+
+/* Ensure the CodeMirror editor itself is transparent */
+:deep(.cm-editor) {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Transparent scroll area */
+:deep(.cm-scroller) {
+  background-color: transparent !important;
+  border: none !important;
+}
+
+/* Transparent gutters (line numbers) */
+:deep(.cm-gutters) {
+  background-color: transparent !important;
+  border: none !important;
+}
+
+/* Remove any theme-provided borders/outlines */
+:deep(.cm-gutters .cm-gutter) { border: none !important; box-shadow: none !important; }
+:deep(.cm-editor.cm-focused) { outline: none !important; }
+:deep(.cm-content) { border: none !important; box-shadow: none !important; }
+:deep(.cm-panels) { border: none !important; box-shadow: none !important; }
+:deep(.vue-codemirror) { border: none !important; box-shadow: none !important; background: transparent !important; }
 </style>

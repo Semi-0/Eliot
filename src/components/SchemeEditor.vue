@@ -85,7 +85,20 @@ const updateCode = (code) => {
   left: 0;
   top: 0;
   padding: 0.5em;
-  background: #f0f0f0;
+  background: transparent;
   border-right: 1px solid #ddd;
 }
+
+/* Make Prism editor background transparent when used */
+.prism-editor,
+.prism-editor__editor,
+.prism-editor__textarea {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Remove any residual border from container */
+.editor-container, .scheme-editor-container { border: none !important; box-shadow: none !important; }
 </style> 

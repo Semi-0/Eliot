@@ -27,6 +27,7 @@ const links = shallowRef([
 const showEditor = ref(true);
 const schemeCode = ref('');
 const execution_result = ref('');
+const evalError = ref('');
 
 function reference_store() {
   let id = 0
@@ -96,37 +97,54 @@ function clear_graph(){
 }
 
 
-
-
 // Add a watch if you need to respond to code changes
 watch(schemeCode, (newCode) => {
    const full_text = newCode
+   // Persist editor content for refresh survival
+  try {
+    localStorage.setItem('eliot.schemeCode', full_text)
+  } catch (e) {
+    // ignore storage errors
+  }
 
-  try{
-    clear_graph()
-    setTimeout(() => {
+  evalError.value = ''
+  clear_graph()
+  setTimeout(() => {
+    try {
       clear_env()
       env.load(make_primitive_package())
       env.load(make_graph_wrapper_package())
       const result = main(full_text)
       console.log("result", result)
       execution_result.value = result.value
-    }, 10)
-    
-  }
-  catch(e){
-    console.error(e)
-  }
+      evalError.value = ''
+    } catch (e) {
+      console.error(e)
+      evalError.value = (e && e.message) ? e.message : String(e)
+    }
+  }, 10)
   
    console.log(execution_result.value)
   // Add your code processing logic here
 });
 
 
+// Load last saved content on mount
+onMounted(() => {
+  try {
+    const saved = localStorage.getItem('eliot.schemeCode')
+    if (saved !== null) {
+      schemeCode.value = saved
+    }
+  } catch (e) {
+    // ignore storage errors
+  }
+})
+
 </script>
 
 <template>
-  <div class="app-container" style="background-color: #f0f0f0;">
+  <div class="app-container" style="background-color: #0b0b0d;">
 
     <div class="editor-overlay">
       <!-- <SchemeEditor
@@ -140,6 +158,7 @@ watch(schemeCode, (newCode) => {
 
 
     </div>
+    <div v-if="evalError" class="error-panel">{{ evalError }}</div>
     <div class="graph-container">
       <ForceGraph :nodes="nodes" :links="links" />
     </div>
@@ -182,6 +201,22 @@ watch(schemeCode, (newCode) => {
   z-index: 1;
   overflow: visible;
 
+}
+
+.error-panel {
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  right: 20px;
+  z-index: 3;
+  background: rgba(220, 53, 69, 0.12);
+  color: #ffb3b8;
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
 }
 
 .append-button {
